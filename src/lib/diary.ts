@@ -50,7 +50,7 @@ export function quoteOfTheDay(): string {
   const now = new Date();
   const startOfYear = new Date(now.getFullYear(), 0, 0);
   const day = Math.floor((now.getTime() - startOfYear.getTime()) / 86400000);
-  return QUOTES[day % QUOTES.length];
+  return QUOTES[day % QUOTES.length] ?? QUOTES[0]!;
 }
 
 /** Signed, private URL for a diary photo (paths stay user-scoped). */
