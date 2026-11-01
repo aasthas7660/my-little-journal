@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { BookText, CalendarDays, Feather, MailHeart, NotebookPen, Sparkles } from "lucide-react";
+import { BookText, CalendarDays, Feather, Heart, NotebookPen, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AppHeader, JournalBrand } from "@/components/app-header";
 import { PhotoThumb } from "@/components/photo-thumb";
@@ -10,9 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   formatEntryDate,
   formatShortDate,
+  quoteOfTheDay,
   todayISO,
-  type DiaryEntry,
-  type Profile,
 } from "@/lib/diary";
 import { entriesQuery, profileQuery } from "@/lib/queries";
 import { moodInfo } from "@/lib/moods";
@@ -94,7 +93,7 @@ function Landing() {
             { icon: NotebookPen, title: "Daily pages", text: "Moods, prompts and photos." },
             { icon: BookText, title: "Archive", text: "Search and revisit memories." },
             { icon: CalendarDays, title: "Calendar", text: "See which days you wrote." },
-            { icon: MailHeart, title: "Letters", text: "Notes to your future self." },
+            { icon: Heart, title: "Letters", text: "Notes to your future self." },
           ].map((f) => (
             <Card key={f.title} className="lift rounded-3xl border-border/60 shadow-card">
               <CardContent className="p-5">
@@ -111,8 +110,8 @@ function Landing() {
 }
 
 function Dashboard() {
-  const { data: profile } = useQuery<Profile>({ ...profileQuery(), retry: false });
-  const { data: entries } = useQuery<DiaryEntry[]>({ ...entriesQuery({ limit: 6 }) });
+  const { data: profile } = useQuery({ ...profileQuery(), retry: false });
+  const { data: entries } = useQuery(entriesQuery({ limit: 6 }));
 
   const today = todayISO();
   const todaysEntry = entries?.find((e) => e.entry_date === today);
@@ -153,14 +152,17 @@ function Dashboard() {
         </div>
         <p className="mt-6 font-serif text-base italic text-foreground/80">
           <Sparkles className="mr-1 inline h-4 w-4 text-soft-purple" />
-          {quoteOfTheDaySafe()}
+          {quoteOfTheDay()}
         </p>
       </section>
 
       <section className="mt-8">
         <div className="flex items-center justify-between">
           <h2 className="font-serif text-2xl font-semibold">Recent entries</h2>
-          <Link to="/archive" className="text-sm font-medium text-soft-purple underline-offset-4 hover:underline">
+          <Link
+            to="/archive"
+            className="text-sm font-medium text-soft-purple underline-offset-4 hover:underline"
+          >
             View all
           </Link>
         </div>
@@ -189,10 +191,7 @@ function Dashboard() {
               const mood = moodInfo(entry.mood);
               const excerpt = entry.content.replace(/\s+/g, " ").slice(0, 120);
               return (
-                <Card
-                  key={entry.id}
-                  className="lift rounded-3xl border-border/60 shadow-card"
-                >
+                <Card key={entry.id} className="lift rounded-3xl border-border/60 shadow-card">
                   <CardContent className="flex gap-4 p-5">
                     {entry.photo_url ? (
                       <PhotoThumb
@@ -235,7 +234,7 @@ function Dashboard() {
         {[
           { to: "/archive", icon: BookText, title: "Archive", text: "Search every page you've written." },
           { to: "/calendar", icon: CalendarDays, title: "Calendar", text: "Spot the days you kept." },
-          { to: "/letters", icon: MailHeart, title: "Letters", text: "Say something to future you." },
+          { to: "/letters", icon: Heart, title: "Letters", text: "Say something to future you." },
         ].map((tile) => (
           <Link
             key={tile.to}
@@ -250,11 +249,4 @@ function Dashboard() {
       </section>
     </div>
   );
-}
-
-// quoteOfTheDay is client-only (uses Date), but this component only renders
-// after the auth check on the client, so it is safe to call directly.
-import { quoteOfTheDay } from "@/lib/diary";
-function quoteOfTheDaySafe() {
-  return quoteOfTheDay();
 }
