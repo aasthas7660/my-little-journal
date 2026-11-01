@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BookText,
@@ -6,8 +7,10 @@ import {
   Heart,
   Home,
   Menu,
+  Moon,
   NotebookPen,
   Settings,
+  Sun,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,6 +24,45 @@ const NAV_ITEMS = [
   { to: "/letters", label: "Letters", icon: Heart },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
+
+function ThemeToggle() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("journal-theme");
+    const dark = savedTheme
+      ? savedTheme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    document.documentElement.classList.toggle("dark", dark);
+    setIsDark(dark);
+  }, []);
+
+  function toggleTheme() {
+    const nextTheme = !isDark;
+
+    setIsDark(nextTheme);
+    document.documentElement.classList.toggle("dark", nextTheme);
+    localStorage.setItem("journal-theme", nextTheme ? "dark" : "light");
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={toggleTheme}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Light mode" : "Dark mode"}
+      className="rounded-full"
+    >
+      {isDark ? (
+        <Sun className="h-5 w-5 text-amber-400" />
+      ) : (
+        <Moon className="h-5 w-5 text-soft-purple" />
+      )}
+    </Button>
+  );
+}
 
 export function JournalBrand({ className }: { className?: string }) {
   return (
@@ -69,7 +111,6 @@ function NavLink({
   );
 }
 
-/** App header. Full navigation for signed-in pages, a soft guest bar for the landing page. */
 export function AppHeader({ variant = "app" }: { variant?: "app" | "guest" }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
@@ -93,38 +134,45 @@ export function AppHeader({ variant = "app" }: { variant?: "app" | "guest" }) {
               ))}
             </nav>
 
-            <div className="md:hidden">
-              <Sheet open={open} onOpenChange={setOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon" aria-label="Open menu">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-72">
-                  <SheetTitle className="font-serif text-xl font-semibold">
-                    My Little Journal <span className="text-primary">♡</span>
-                  </SheetTitle>
-                  <nav className="mt-6 flex flex-col gap-1">
-                    {NAV_ITEMS.map((item) => (
-                      <NavLink
-                        key={item.to}
-                        to={item.to}
-                        label={item.label}
-                        icon={item.icon}
-                        active={pathname === item.to}
-                        onNavigate={() => setOpen(false)}
-                        className="px-4 py-3 text-base"
-                      />
-                    ))}
-                  </nav>
-                </SheetContent>
-              </Sheet>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+
+              <div className="md:hidden">
+                <Sheet open={open} onOpenChange={setOpen}>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon" aria-label="Open menu">
+                      <Menu className="h-5 w-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-72">
+                    <SheetTitle className="font-serif text-xl font-semibold">
+                      My Little Journal <span className="text-primary">♡</span>
+                    </SheetTitle>
+                    <nav className="mt-6 flex flex-col gap-1">
+                      {NAV_ITEMS.map((item) => (
+                        <NavLink
+                          key={item.to}
+                          to={item.to}
+                          label={item.label}
+                          icon={item.icon}
+                          active={pathname === item.to}
+                          onNavigate={() => setOpen(false)}
+                          className="px-4 py-3 text-base"
+                        />
+                      ))}
+                    </nav>
+                  </SheetContent>
+                </Sheet>
+              </div>
             </div>
           </>
         ) : (
-          <Button asChild className="rounded-full">
-            <Link to="/auth">Sign in</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button asChild className="rounded-full">
+              <Link to="/auth">Sign in</Link>
+            </Button>
+          </div>
         )}
       </div>
     </header>

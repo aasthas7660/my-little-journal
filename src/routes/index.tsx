@@ -120,7 +120,9 @@ function Dashboard() {
   const name = profile?.display_name?.trim();
 
   return (
-    <div className="animate-fade-up">
+  <div className="animate-fade-up">
+    <AppHeader />
+    <main className="mx-auto w-full max-w-5xl px-4 pb-16">
       <section className="gradient-dreamy rounded-3xl p-6 shadow-card md:p-10">
         <p className="text-sm font-medium text-muted-foreground">{formatEntryDate(today)}</p>
         <h1 className="mt-2 font-serif text-3xl font-semibold text-foreground md:text-5xl">
@@ -157,11 +159,13 @@ function Dashboard() {
       </section>
 
       <section className="mt-8">
-        <div className="flex items-center justify-between">
-          <h2 className="font-serif text-2xl font-semibold">Recent entries</h2>
+       <div className="flex items-center justify-between gap-4">
+          <h2 className="min-w-0 font-serif text-2xl font-semibold">
+              Recent entries
+          </h2>
           <Link
             to="/archive"
-            className="text-sm font-medium text-soft-purple underline-offset-4 hover:underline"
+            className="shrink-0 text-sm font-medium text-soft-purple underline-offset-4 hover:underline"
           >
             View all
           </Link>
@@ -247,6 +251,7 @@ function Dashboard() {
           </Link>
         ))}
       </section>
-    </div>
+        </main>
+  </div>
   );
 }

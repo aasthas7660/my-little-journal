@@ -32,6 +32,130 @@ import {
 import { cn } from "@/lib/utils";
 import { pageHead } from "@/lib/head";
 
+
+function MiniCalendar({
+  value,
+  onChange,
+  maxDate,
+}: {
+  value: string;
+  onChange: (date: string) => void;
+  maxDate: string;
+}) {
+  const selected = value
+    ? new Date(`${value}T00:00:00`)
+    : new Date();
+
+  const [viewDate, setViewDate] = useState(
+    new Date(selected.getFullYear(), selected.getMonth(), 1),
+  );
+
+  const year = viewDate.getFullYear();
+  const month = viewDate.getMonth();
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const today = new Date();
+  const todayString = [
+    today.getFullYear(),
+    String(today.getMonth() + 1).padStart(2, "0"),
+    String(today.getDate()).padStart(2, "0"),
+  ].join("-");
+
+  const monthName = viewDate.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const dates = Array.from(
+    { length: firstDay + daysInMonth },
+    (_, index) => index < firstDay ? null : index - firstDay + 1,
+  );
+
+  function formatDate(day: number) {
+    return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+  }
+
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card p-3 shadow-card">
+      <div className="mb-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setViewDate(new Date(year, month - 1, 1))}
+          className="rounded-full p-2 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+          aria-label="Previous month"
+        >
+          ‹
+        </button>
+
+        <span className="font-serif text-lg font-semibold text-foreground">
+          {monthName}
+        </span>
+
+        <button
+          type="button"
+          onClick={() => setViewDate(new Date(year, month + 1, 1))}
+          className="rounded-full p-2 text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+          aria-label="Next month"
+        >
+          ›
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
+          <span
+            key={`${day}-${index}`}
+            className="py-1 text-xs font-medium text-muted-foreground"
+          >
+            {day}
+          </span>
+        ))}
+
+        {dates.map((day, index) => {
+          if (day === null) {
+            return <div key={`empty-${index}`} />;
+          }
+
+          const date = formatDate(day);
+          const isSelected = date === value;
+          const isToday = date === todayString;
+          const isFuture = date > maxDate;
+
+          return (
+            <button
+              key={date}
+              type="button"
+              disabled={isFuture}
+              onClick={() => onChange(date)}
+              className={`relative flex h-9 items-center justify-center rounded-full text-sm transition ${
+                isSelected
+                  ? "bg-primary text-primary-foreground shadow-sm"
+                  : isToday
+                    ? "border border-primary text-primary"
+                    : "text-foreground hover:bg-secondary"
+              } ${
+                isFuture ? "cursor-not-allowed opacity-30" : ""
+              }`}
+            >
+              {day}
+              {isToday && !isSelected && (
+                <span className="absolute bottom-0.5 h-1 w-1 rounded-full bg-primary" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        Choose a date for your little memory ♡
+      </p>
+    </div>
+  );
+}
+
+
 export const Route = createFileRoute("/_authenticated/write")({
   validateSearch: (search: Record<string, unknown>) => ({
     id: typeof search.id === "string" && search.id ? search.id : undefined,
@@ -171,51 +295,108 @@ function WritePage() {
         <Card className="rounded-3xl border-border/60 shadow-card">
           <CardContent className="space-y-5 p-5 md:p-7">
             <div className="grid gap-4 sm:grid-cols-2">
+              
               <div className="space-y-1.5">
-                <Label htmlFor="entry-date">Date</Label>
-                <Input
-                  id="entry-date"
-                  type="date"
+                <Label>Date ♡</Label>
+                <MiniCalendar
                   value={entryDate}
-                  max={todayISO()}
-                  onChange={(e) => setEntryDate(e.target.value)}
+                  onChange={setEntryDate}
+                  maxDate={todayISO()}
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="entry-title">Heading</Label>
-                <Input
-                  id="entry-title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="A little headline for today…"
-                />
-              </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Mood</Label>
-              <div className="grid grid-cols-4 gap-2 sm:grid-cols-8">
-                {MOODS.map((m) => (
-                  <button
-                    key={m.value}
-                    type="button"
-                    onClick={() => setMood(m.value)}
-                    aria-pressed={mood === m.value}
-                    className={cn(
-                      "flex flex-col items-center gap-1 rounded-2xl border px-1 py-2.5 transition-colors",
-                      mood === m.value
-                        ? "border-soft-purple bg-secondary shadow-card"
-                        : "border-border/60 bg-card hover:bg-muted",
-                    )}
-                  >
-                    <span className="text-2xl">{m.emoji}</span>
-                    <span className="text-[11px] font-medium text-muted-foreground">
-                      {m.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
+             
+<div className="space-y-3">
+  <div>
+    <Label>Choose a heading ♡</Label>
+    <div className="mt-2 flex flex-wrap gap-2">
+      {[
+        "My little moments 🌷",
+        "Today in a nutshell ☁️",
+        "A day to remember ✨",
+        "Dear diary 💌",
+        "Little things that made me smile 🌸",
+        "A thought to keep 💭",
+        "Today's memories 🦋",
+        "Just another chapter 📖",
+      ].map((suggestion) => (
+        <button
+          key={suggestion}
+          type="button"
+          onClick={() => setTitle(suggestion)}
+          className={`rounded-full border px-3 py-1.5 text-xs transition-all hover:-translate-y-0.5 hover:bg-secondary ${
+            title === suggestion
+              ? "border-primary bg-secondary text-foreground"
+              : "border-border/60 bg-card text-muted-foreground"
+          }`}
+        >
+          {suggestion}
+        </button>
+      ))}
+    </div>
+  </div>
+
+  <div className="space-y-1.5">
+    <Label htmlFor="entry-title">Heading</Label>
+    <Input
+      id="entry-title"
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+      placeholder="A little headline for today…"
+    />
+  </div>
+</div>
+
+</div>
+
+            
+<div className="space-y-3">
+  <Label className="font-serif text-base">How is your heart today? ♡</Label>
+
+  <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
+    {MOODS.map((m, index) => (
+      <button
+        key={m.value}
+        type="button"
+        onClick={() => setMood(m.value)}
+        aria-pressed={mood === m.value}
+        className={cn(
+          "group flex flex-col items-center justify-center gap-2 rounded-2xl border px-1 py-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-md",
+          mood === m.value
+            ? "border-soft-purple bg-secondary/80 shadow-card ring-2 ring-soft-purple/20"
+            : "border-border/50 bg-card/70 hover:border-soft-purple/50 hover:bg-secondary/40",
+        )}
+      >
+        <span
+          className={cn(
+            "flex h-11 w-11 items-center justify-center rounded-full text-2xl transition-transform duration-300 group-hover:scale-110",
+            [
+              "bg-amber-100/80",
+              "bg-violet-100/80",
+              "bg-rose-100/80",
+              "bg-fuchsia-100/80",
+              "bg-indigo-100/80",
+              "bg-sky-100/80",
+              "bg-purple-100/80",
+              "bg-orange-100/80",
+            ][index % 8],
+          )}
+        >
+          {m.emoji}
+        </span>
+
+        <span className="text-[11px] font-medium text-muted-foreground">
+          {m.label}
+        </span>
+
+        {mood === m.value && (
+          <span className="text-[10px] text-soft-purple">♡</span>
+        )}
+      </button>
+    ))}
+  </div>
+</div>
+
 
             <div className="space-y-2">
               <Label htmlFor="entry-content">Your entry</Label>
@@ -224,7 +405,7 @@ function WritePage() {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Dear journal…"
-                className="panel-paper min-h-56 resize-y rounded-2xl"
+                className="min-h-56 resize-y rounded-2xl bg-card"
               />
             </div>
 
