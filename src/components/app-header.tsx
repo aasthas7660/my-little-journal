@@ -3,8 +3,8 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   BookText,
   CalendarDays,
+  Heart,
   Home,
-  MailHeart,
   Menu,
   NotebookPen,
   Settings,
@@ -18,7 +18,7 @@ const NAV_ITEMS = [
   { to: "/write", label: "Write", icon: NotebookPen },
   { to: "/archive", label: "Archive", icon: BookText },
   { to: "/calendar", label: "Calendar", icon: CalendarDays },
-  { to: "/letters", label: "Letters", icon: MailHeart },
+  { to: "/letters", label: "Letters", icon: Heart },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -58,7 +58,7 @@ function NavLink({
       className={cn(
         "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors",
         active
-          ? "bg-secondary text-primary-foreground-foreground text-foreground shadow-card"
+          ? "bg-secondary text-foreground shadow-card"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",
         className,
       )}
