@@ -15,6 +15,13 @@
       "when": 1793450051417,
       "tag": "0001_diary_photos_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793502420424,
+      "tag": "0002_migration",
+      "breakpoints": true
     }
   ]
 }
